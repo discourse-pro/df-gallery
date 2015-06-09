@@ -1,0 +1,1 @@
+# The «Gallery» plugin adds the ability to show multiple images in a post as a gallery.
