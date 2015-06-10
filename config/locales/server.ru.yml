@@ -1,4 +1,4 @@
 ru:
   site_settings:
     «Gallery»_Enabled: "Включить плагин «<a href='http://discourse.pro/t/34'>Галерея</a>»?."
-    «Gallery»_Thumbnail_Default_Size: "Стандартный размер миниатюры в пикселях.<br/>Вы можете установить для конкретной галереи индивидуальный размер миниатюры посредством свойства «<b>thumb_size</b>» тега <b>[gallery]</b>, например: <b>[gallery thumb_size=200]</b>."
+    «Gallery»_Thumbnail_Size: "в пикселях"

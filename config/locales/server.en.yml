@@ -1,4 +1,4 @@
 en:
   site_settings:
     «Gallery»_Enabled: "Enable «<a href='http://discourse.pro/t/34'>Gallery</a>» plugin."
-    «Gallery»_Thumbnail_Default_Size: "In pixels. While writing a post you can specify an unique thumbnail size for a particular gallery using <b>[gallery thumb_size=200]</b> syntax (place your size instead of 200)."
+    «Gallery»_Thumbnail_Size: "in pixels"

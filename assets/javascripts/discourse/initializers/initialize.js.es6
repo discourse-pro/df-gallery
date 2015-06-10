@@ -39,15 +39,11 @@ var onClick = function(e) {
 		win.focus();
 	}
 	else {
-		//e.stopPropagation();
-		//e.preventDefault();
-		//bootbox.alert('Перехватили :-)');
 		result = true;
 	}
 	return result;
 };
 export default {name: 'gallery', after: 'inject-objects', initialize: function(container) {
-	console.log('initialize');
 	var pluginEnabled = Discourse.SiteSettings['«Gallery»_Enabled'];
 	const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Default_Size'];
 	const h = w;
@@ -60,7 +56,6 @@ export default {name: 'gallery', after: 'inject-objects', initialize: function(c
 			return $a.hasClass('dfNoClickTrack') ? true : original.call(ClickTrack, e);
 		};
 		decorateCooked(container, function($post) {
-			console.log('decorateCooked');
 			/** @type {jQuery} HTMLDivElement[] */
 			var $galleries = $('.df-gallery');
 			if ($galleries.length) {

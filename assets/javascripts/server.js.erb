@@ -1,8 +1,9 @@
 (function() {
 	Discourse.Dialect.replaceBlock({
-		start: /(\[gallery])([\s\S]*)/gmi,
+		start: /\[gallery]([\s\S]*)/gmi,
 		stop: /\[\/gallery]/gmi,
-		emitter: function(contentA) {
+		emitter: function(contentA, matches) {
+			console.log(matches);
 			return ['div', {'class': 'df-gallery df-hidden'}, contentA.join()];
 		}
 	});
