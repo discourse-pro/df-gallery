@@ -1,14 +1,18 @@
 .df-gallery {
 	display: block;
-	width: 100%;
+	//width: 100%;
 	overflow: hidden;
-	//background: yellow;
-	//width: 600px;
 	a {
 		display: block;
 		float: left;
 		margin: 4px;
 		cursor: zoom-in;
+		color: transparent;
+		// http://stackoverflow.com/a/3013068/254475
+		img {
+			border: 0;
+			border-image: 0;
+		}
 	}
 }
 .df-hidden {display: none;}
