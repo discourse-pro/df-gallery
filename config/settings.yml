@@ -1,0 +1,4 @@
+plugins:
+  «Gallery»_Enabled:
+    default: true
+    client: true

@@ -1,0 +1,10 @@
+(function() {
+	Discourse.Dialect.replaceBlock({
+		start: /(\[gallery])([\s\S]*)/gmi,
+		stop: /\[\/gallery]/gmi,
+		emitter: function(contentA) {
+			return ['div', {'class': 'df-gallery df-hidden'}, contentA.join()];
+		}
+	});
+	Discourse.Markdown.whiteListTag('div', 'class', /^df-.*$/ );
+})();
