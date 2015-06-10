@@ -1,1 +1,14 @@
+.df-gallery {
+	display: block;
+	width: 100%;
+	overflow: hidden;
+	//background: yellow;
+	//width: 600px;
+	a {
+		display: block;
+		float: left;
+		margin: 4px;
+		cursor: zoom-in;
+	}
+}
 .df-hidden {display: none;}

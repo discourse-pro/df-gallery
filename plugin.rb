@@ -31,7 +31,8 @@ after_initialize do
 					if not thumbnail.present?
 						createThumbnailsOriginalValue = SiteSetting.create_thumbnails?
 						SiteSetting.create_thumbnails = true
-						thumbnail = upload.create_thumbnail!(w, h)
+						upload.create_thumbnail!(w, h)
+						thumbnail = upload.thumbnail(w, h)
 						SiteSetting.create_thumbnails = createThumbnailsOriginalValue
 					end
 					contentType = thumbnail.extension

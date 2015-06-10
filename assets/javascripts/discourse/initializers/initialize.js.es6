@@ -46,11 +46,12 @@ var onClick = function(e) {
 	}
 	return result;
 };
-var pluginEnabled = Discourse.SiteSettings['«Gallery»_Enabled'];
 export default {name: 'gallery', after: 'inject-objects', initialize: function(container) {
-	if (Discourse.SiteSettings['«Gallery»_Enabled']) {
-		const w = 100;
-		const h = 100;
+	console.log('initialize');
+	var pluginEnabled = Discourse.SiteSettings['«Gallery»_Enabled'];
+	const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Default_Size'];
+	const h = w;
+	if (pluginEnabled) {
 		/** @type {Function} */
 		var original = ClickTrack.trackClick;
 		ClickTrack.trackClick = function(e) {
@@ -59,55 +60,58 @@ export default {name: 'gallery', after: 'inject-objects', initialize: function(c
 			return $a.hasClass('dfNoClickTrack') ? true : original.call(ClickTrack, e);
 		};
 		decorateCooked(container, function($post) {
+			console.log('decorateCooked');
 			/** @type {jQuery} HTMLDivElement[] */
 			var $galleries = $('.df-gallery');
-			/** @type {jQuery} HTMLImageElement[] */
-			var $images = $('img', $galleries);
-			$images.each(function() {
-				/** @type {jQuery} HTMLImageElement */
-				var $image = $(this);
-				/** @type {String} */
-				var fullSizeUrl = $image.attr('src');
-				/** @type {String} */
-				var thumbUrl =
-					'/gallery/thumb/' + w + '/' + h
-					+ '?original=' + encodeURIComponent(imageId(fullSizeUrl))
-				;
-				/** @type {String} */
-				var title = $image.attr('alt');
-				$image.attr({src: thumbUrl, width: w, height: h});
-				var $a = $('<a/>').attr({href: fullSizeUrl, title: title, 'class': 'dfNoClickTrack'});
-				$a.click(onClick);
-				$image.wrap($a);
-			});
-			// We do not use standard Magnific Popup
-			// loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
-			// because it does not work in gallery mode.
-			//loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
-				$galleries.each(function() {
-					/** @type {jQuery} HTMLDivElement */
-					var $gallery = $(this);
-
+			if ($galleries.length) {
+				// For edit mode: check if already processed.
+				// Important!
+				$('br', $galleries).remove();
+				/** @type {jQuery} HTMLImageElement[] */
+				var $images = $galleries.children('img');
+				$images.each(function() {
+					/** @type {jQuery} HTMLImageElement */
+					var $image = $(this);
+					/** @type {String} */
+					var fullSizeUrl = $image.attr('src');
+					/** @type {String} */
+					var thumbUrl =
+						'/gallery/thumb/' + w + '/' + h
+						+ '?original=' + encodeURIComponent(imageId(fullSizeUrl))
+					;
+					/** @type {String} */
+					var title = $image.attr('alt');
+					$image.attr({src: thumbUrl, width: w, height: h});
+					var $a = $('<a/>');
+					$a.attr({href: fullSizeUrl, title: title, 'class': 'dfNoClickTrack'});
+					//$a.css({width: w, height: h});
+					$a.click(onClick);
+					$image.wrap($a);
 				});
-			$galleries.magnificPopup({
-				delegate: 'a',
-				type: 'image',
-				tLoading: 'Loading image #%curr%...',
-				mainClass: 'mfp-img-mobile',
-				gallery: {
-					enabled: true,
-					navigateByImgClick: true,
-					preload: [0,1] // Will preload 0 - before current, and 1 after the current image
-				},
-				image: {
-					tError: '<a href="%url%">The image #%curr%</a> could not be loaded.',
-					titleSrc: function(item) {
-						return item.el.attr('title');
+				// We do not use standard Magnific Popup
+				// loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
+				// because it does not work in gallery mode.
+				//loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
+				$galleries.magnificPopup({
+					delegate: 'a',
+					type: 'image',
+					tLoading: 'Loading image #%curr%...',
+					mainClass: 'mfp-img-mobile',
+					gallery: {
+						enabled: true,
+						navigateByImgClick: true,
+						preload: [0,1] // Will preload 0 - before current, and 1 after the current image
+					},
+					image: {
+						tError: '<a href="%url%">The image #%curr%</a> could not be loaded.',
+						titleSrc: function(item) {
+							return item.el.attr('title');
+						}
 					}
-				}
-			});
-			//});
-			$galleries.removeClass('df-hidden');
+				});
+				//});
+				$galleries.removeClass('df-hidden');
+			}
 		});
 	}
 }};

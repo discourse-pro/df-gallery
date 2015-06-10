@@ -2,3 +2,6 @@ plugins:
   «Gallery»_Enabled:
     default: true
     client: true
+  «Gallery»_Thumbnail_Default_Size:
+    client: true
+    default: 100
