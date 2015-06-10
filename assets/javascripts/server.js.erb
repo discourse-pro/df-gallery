@@ -3,8 +3,8 @@
 		start: /(\[gallery])([\s\S]*)/gmi,
 		stop: /\[\/gallery]/gmi,
 		emitter: function(contentA) {
-			return ['div', {'class': 'df-gallery df-hidden'}, contentA.join()];
+			return ['div', {'class': 'df-hidden111'}, ['div', {'class': 'df-gallery222'}, contentA.join()]];
 		}
 	});
-	Discourse.Markdown.whiteListTag('div', 'class', /^df-.*$/ );
+	Discourse.Markdown.whiteListTag('div', 'class', /^df\-[\s\S]+$/);
 })();
