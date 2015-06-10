@@ -4,7 +4,7 @@
 # authors: Dmitry Fedyuk
 # url: http://discourse.pro/t/34
 register_asset 'javascripts/server.js.erb', :server_side
-#register_asset 'javascripts/magnific-popup.js'
+register_asset 'javascripts/magnific-popup.js'
 register_asset 'stylesheets/main.scss'
 register_asset 'stylesheets/magnific-popup/main.scss'
 after_initialize do

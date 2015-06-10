@@ -1,5 +1,6 @@
 import {decorateCooked} from 'discourse/lib/plugin-api';
 import loadScript from 'discourse/lib/load-script';
+import ClickTrack from 'discourse/lib/click-track';
 /*
  * @param {String} url
  * @returns {String}
@@ -20,12 +21,44 @@ var imageId = function(url) {
 	var hash = baseName(url);
 	return 40 === hash.length ? hash : url;
 };
+var onClick = function(e) {
+	/** @type {jQuery} HTMLAnchorElement */
+	var $a = $(e.currentTarget);
+	/** @type {String} */
+	var href = $a.attr('href') || $a.data('href');
+	/** @type {Boolean} */
+	var result = false;
+	if (3 === e.which) {
+		// right menu
+		ClickTrack.trackClick(e);
+		//result = true;
+	}
+	else if ((2 === e.which) || e.shiftKey || e.metaKey || e.ctrlKey) {
+		// new tab or window
+		var win = window.open(href, '_blank');
+		win.focus();
+	}
+	else {
+		//e.stopPropagation();
+		//e.preventDefault();
+		//bootbox.alert('Перехватили :-)');
+		result = true;
+	}
+	return result;
+};
+var pluginEnabled = Discourse.SiteSettings['«Gallery»_Enabled'];
 export default {name: 'gallery', after: 'inject-objects', initialize: function(container) {
-	const w = 100;
-	const h = 100;
 	if (Discourse.SiteSettings['«Gallery»_Enabled']) {
+		const w = 100;
+		const h = 100;
+		/** @type {Function} */
+		var original = ClickTrack.trackClick;
+		ClickTrack.trackClick = function(e) {
+			/** @type {jQuery} HTMLAnchorElement */
+			var $a = $(e.currentTarget);
+			return $a.hasClass('dfNoClickTrack') ? true : original.call(ClickTrack, e);
+		};
 		decorateCooked(container, function($post) {
-			return;
 			/** @type {jQuery} HTMLDivElement[] */
 			var $galleries = $('.df-gallery');
 			/** @type {jQuery} HTMLImageElement[] */
@@ -43,32 +76,38 @@ export default {name: 'gallery', after: 'inject-objects', initialize: function(c
 				/** @type {String} */
 				var title = $image.attr('alt');
 				$image.attr({src: thumbUrl, width: w, height: h});
-				$image.wrap($('<a/>').attr({href: fullSizeUrl, title: title}));
+				var $a = $('<a/>').attr({href: fullSizeUrl, title: title, 'class': 'dfNoClickTrack'});
+				$a.click(onClick);
+				$image.wrap($a);
 			});
-			loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
+			// We do not use standard Magnific Popup
+			// loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
+			// because it does not work in gallery mode.
+			//loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
 				$galleries.each(function() {
 					/** @type {jQuery} HTMLDivElement */
 					var $gallery = $(this);
-					$gallery.magnificPopup({
-						delegate: 'a',
-						type: 'image',
-						tLoading: 'Loading image #%curr%...',
-						mainClass: 'mfp-img-mobile',
-						gallery: {
-							enabled: true,
-							navigateByImgClick: true,
-							preload: [0,1] // Will preload 0 - before current, and 1 after the current image
-						},
-						image: {
-							tError: '<a href="%url%">The image #%curr%</a> could not be loaded.',
-							titleSrc: function(item) {
-								return item.el.attr('title');
-							}
-						}
-					});
+
 				});
+			$galleries.magnificPopup({
+				delegate: 'a',
+				type: 'image',
+				tLoading: 'Loading image #%curr%...',
+				mainClass: 'mfp-img-mobile',
+				gallery: {
+					enabled: true,
+					navigateByImgClick: true,
+					preload: [0,1] // Will preload 0 - before current, and 1 after the current image
+				},
+				image: {
+					tError: '<a href="%url%">The image #%curr%</a> could not be loaded.',
+					titleSrc: function(item) {
+						return item.el.attr('title');
+					}
+				}
 			});
-			//alert(typeof $galleries.magnificPopup);
+			//});
+			$galleries.removeClass('df-hidden');
 		});
 	}
 }};
