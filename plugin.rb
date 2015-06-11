@@ -55,5 +55,13 @@ after_initialize do
 		Gallery::Engine.routes.draw do
 			get '/thumb/:width/:height' => 'index#thumbnail'
 		end
+		require 'cooked_post_processor'
+		CookedPostProcessor.class_eval do
+			alias_method :core__extract_images, :extract_images
+			def extract_images
+				@doc.css('.df-gallery img') -
+				core__extract_images
+			end
+		end
 	end
 end
