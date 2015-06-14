@@ -2,7 +2,7 @@
 # about: The «Gallery» plugin adds the ability to show multiple images in a post as a gallery.
 # version: 1.0.0
 # authors: Dmitry Fedyuk
-# url: http://discourse.pro/t/34
+# url: https://discourse.pro/t/34
 register_asset 'javascripts/server.js.erb', :server_side
 register_asset 'javascripts/magnific-popup.js'
 register_asset 'stylesheets/main.scss'
