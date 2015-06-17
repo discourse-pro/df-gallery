@@ -43,7 +43,7 @@ var onClick = function(e) {
 	}
 	return result;
 };
-export default {name: 'gallery', after: 'inject-objects', initialize: function(container) {
+export default {name: 'df-gallery', after: 'inject-objects', initialize: function(container) {
 	var pluginEnabled = Discourse.SiteSettings['«Gallery»_Enabled'];
 	const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Size'];
 	const h = w;
