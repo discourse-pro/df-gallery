@@ -1,6 +1,37 @@
+import DiscourseLocation from 'discourse/lib/discourse-location';
 import {decorateCooked} from 'discourse/lib/plugin-api';
 import loadScript from 'discourse/lib/load-script';
 import ClickTrack from 'discourse/lib/click-track';
+DiscourseLocation.reopen({
+	/**
+	 * 2015-07-09
+	 * Ядро Discourse содержит проблемный код в методе onUpdateURL класса DiscourseLocation:
+	 * app/assets/javascripts/discourse/lib/discourse-location.js.es6:
+		popstateCallbacks.forEach(function(cb) {
+			cb(url);
+		});
+	 * Из-за этого кода при моей двойной ручной смене в адресной строке хэша Discourse зависает.
+	 * Моя заплатка устраняет эту проблему.
+	 */
+	onUpdateURL: function(callback) {
+		this._super(callback);
+		const guid = Ember.guidFor(this);
+		const eventId = 'popstate.ember-location-' + guid;
+		const $window = $(window);
+		const events = $._data($window[0], 'events');
+		if (events && events['popstate'] && events['popstate'][0] && events['popstate'][0].handler) {
+			const coreHandler = events['popstate'][0].handler;
+			$window.off(eventId);
+			if (coreHandler) {
+				$window.on(eventId, function() {
+					if (!DiscourseLocation.disableUpdateUrl) {
+						coreHandler.call(window);
+					}
+				});
+			}
+		}
+	}
+});
 /*
  * @param {String} url
  * @returns {String}
@@ -43,6 +74,27 @@ var onClick = function(e) {
 	}
 	return result;
 };
+/** @link http://stackoverflow.com/a/5298684/254475 */
+const removeLocationHash = function () {
+    var scrollV, scrollH, loc = window.location;
+    if ('pushState' in history) {
+		history.pushState('', document.title, loc.pathname + loc.search);
+	}
+    else {
+        // Prevent scrolling by storing the page's current scroll offset
+        scrollV = document.body.scrollTop;
+        scrollH = document.body.scrollLeft;
+		silentlyChangeLocationHash('');
+        // Restore the scroll offset, should be flicker free
+        document.body.scrollTop = scrollV;
+        document.body.scrollLeft = scrollH;
+    }
+};
+const silentlyChangeLocationHash = function(newHash) {
+	DiscourseLocation.disableUpdateUrl = true;
+	location.hash = newHash;
+	DiscourseLocation.disableUpdateUrl = false;
+};
 export default {name: 'df-gallery', after: 'inject-objects', initialize: function(container) {
 	var pluginEnabled = Discourse.SiteSettings['«Gallery»_Enabled'];
 	const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Size'];
@@ -55,10 +107,14 @@ export default {name: 'df-gallery', after: 'inject-objects', initialize: functio
 			var $a = $(e.currentTarget);
 			return $a.hasClass('dfNoClickTrack') ? true : original.call(ClickTrack, e);
 		};
+		/*Discourse.reopen({
+			LOG_TRANSITIONS: true,
+			LOG_TRANSITIONS_INTERNAL: true
+		});*/
 		decorateCooked(container, function($post) {
 			// 2015-07-08
 			// Это обрамление нужно обязательно!
-			$(function(){
+			$(function() {
 				/** @type {jQuery} HTMLDivElement[] */
 				var $galleries = $('.df-gallery');
 				const matches = location.hash.match(/#image(\d+)/);
@@ -112,6 +168,19 @@ export default {name: 'df-gallery', after: 'inject-objects', initialize: functio
 									return item.el.attr('title');
 								}
 							}
+							,callbacks: {
+								open: function() {
+									const magnificPopup = $.magnificPopup.instance;
+									const currentItem = magnificPopup.currItem;
+									const imageId = currentItem.el.children('img').attr('data-file-id');
+									if (imageId) {
+										silentlyChangeLocationHash('#image' + imageId);
+									}
+								}
+								,close: function() {
+									removeLocationHash();
+								}
+					  		}
 						};
 						var indexToOpen = null;
 						if (imageIdToOpen) {
