@@ -86,7 +86,6 @@ export default {name: 'df-gallery', after: 'inject-objects', initialize: functio
 				// We do not use standard Magnific Popup
 				// loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
 				// because it does not work in gallery mode.
-				//loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
 				$galleries.magnificPopup({
 					delegate: 'a',
 					type: 'image',
@@ -104,7 +103,6 @@ export default {name: 'df-gallery', after: 'inject-objects', initialize: functio
 						}
 					}
 				});
-				//});
 				$galleries.removeClass('df-hidden');
 			}
 		});

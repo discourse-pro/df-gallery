@@ -8,6 +8,20 @@ register_asset 'javascripts/magnific-popup.js'
 register_asset 'stylesheets/main.scss'
 register_asset 'stylesheets/magnific-popup/main.scss'
 after_initialize do
+	# 2015-07-08
+	# Добавляем к картинкам идентификаторы соответствующих им в таблице uploads строк
+	require_dependency 'plugin/filter'
+	Plugin::Filter.register(:after_post_cook) do |post, cooked|
+		cooked.gsub!(/<img src="([^"]+)"/) {
+			upload = Upload.find_by(url: $1)
+			if upload
+				"<img data-file-id=\"#{upload.id}\" src=\"#{$1}\""
+			else
+				"<img src=\"#{$1}\""
+			end
+		}
+		cooked
+	end	
 	module ::Gallery
 		class Engine < ::Rails::Engine
 			engine_name 'gallery'
