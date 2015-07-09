@@ -1,6 +1,6 @@
 # name: df-gallery
 # about: The «Gallery» plugin adds the ability to show multiple images in a post as a gallery.
-# version: 1.0.0
+# version: 2.0.0
 # authors: Dmitry Fedyuk
 # url: https://discourse.pro/t/34
 register_asset 'javascripts/server.js.erb', :server_side

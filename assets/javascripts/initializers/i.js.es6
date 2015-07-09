@@ -169,17 +169,13 @@ export default {name: 'df-gallery', after: 'inject-objects', initialize: functio
 								}
 							}
 							,callbacks: {
-								open: function() {
-									const magnificPopup = $.magnificPopup.instance;
-									const currentItem = magnificPopup.currItem;
-									const imageId = currentItem.el.children('img').attr('data-file-id');
+								change: function(data) {
+									const imageId = data.el.children('img').attr('data-file-id');
 									if (imageId) {
 										silentlyChangeLocationHash('#image' + imageId);
 									}
 								}
-								,close: function() {
-									removeLocationHash();
-								}
+								,close: function() {removeLocationHash();}
 					  		}
 						};
 						var indexToOpen = null;
