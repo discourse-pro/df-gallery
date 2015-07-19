@@ -3,7 +3,7 @@
 # version: 2.0.0
 # authors: Dmitry Fedyuk
 # url: https://discourse.pro/t/34
-register_asset 'javascripts/server.js.erb', :server_side
+register_asset 'javascripts/markdown.js', :server_side
 register_asset 'javascripts/magnific-popup.js'
 register_asset 'stylesheets/main.scss'
 register_asset 'stylesheets/magnific-popup/main.scss'
