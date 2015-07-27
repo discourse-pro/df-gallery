@@ -96,10 +96,9 @@ const silentlyChangeLocationHash = function(newHash) {
 	DiscourseLocation.disableUpdateUrl = false;
 };
 export default {name: 'df-gallery', after: 'inject-objects', initialize: function(container) {
-	var pluginEnabled = Discourse.SiteSettings['«Gallery»_Enabled'];
-	const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Size'];
-	const h = w;
-	if (pluginEnabled) {
+	if (Discourse.SiteSettings['«Gallery»_Enabled']) {
+		const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Size'];
+		const h = w;
 		/** @type {Function} */
 		var original = ClickTrack.trackClick;
 		ClickTrack.trackClick = function(e) {
