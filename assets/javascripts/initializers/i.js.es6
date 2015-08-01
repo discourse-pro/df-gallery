@@ -134,7 +134,7 @@ export default {name: 'df-gallery', after: 'inject-objects', initialize: functio
 						var fullSizeUrl = $image.attr('src');
 						/** @type {String} */
 						var thumbUrl =
-							'/gallery/thumb/' + w + '/' + h
+							'/df/core/thumb/' + w + '/' + h
 							+ '?original=' + encodeURIComponent(imageId(fullSizeUrl))
 						;
 						/** @type {String} */
