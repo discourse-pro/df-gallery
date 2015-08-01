@@ -3,4 +3,4 @@ ru:
     admin:
       site_settings:
         categories:
-          gallery: 'Галерея'
+          df_gallery: 'Discourse.PRO Галерея'

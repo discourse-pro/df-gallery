@@ -3,4 +3,4 @@ en:
     admin:
       site_settings:
         categories:
-          gallery: 'Gallery'
+          df_gallery: 'Discourse.PRO Gallery'
