@@ -164,9 +164,7 @@ const onDecorateCooked = function($post) {
 	var $galleries = $('.df-gallery', $post);
 	const matches = location.hash.match(/#image(\d+)/);
 	const imageIdToOpen = matches && (1 < matches.length) ? matches[1] : null;
-	const imageIdSelector =
-		imageIdToOpen ? 'img[data-file-id=' + imageIdToOpen + ']' : null
-	;
+	const imageIdSelector = imageIdToOpen ? 'img[data-file-id=' + imageIdToOpen + ']' : null;
 	if ($galleries.length) {
 		/** @type {String} */
 		const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Size'];
@@ -229,7 +227,7 @@ const onDecorateCooked = function($post) {
 			if (imageIdToOpen) {
 				const $img = $(imageIdSelector, $gallery);
 				if ($img.length) {
-					indexToOpen = $img.parent().index();
+					indexToOpen = $img.parent().index('img');
 				}
 			}
 			/**
