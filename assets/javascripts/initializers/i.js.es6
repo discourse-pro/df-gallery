@@ -2,12 +2,28 @@ import DiscourseLocation from 'discourse/plugins/df-gallery/discourse-location';
 import {decorateCooked} from 'discourse/lib/plugin-api';
 import loadScript from 'discourse/lib/load-script';
 import ClickTrack from 'discourse/lib/click-track';
+export default {name: 'df-gallery', after: 'inject-objects', initialize: function(c) {
+	if (Discourse.SiteSettings['«Gallery»_Enabled']) {
+		/** @type {Function} */
+		const original = ClickTrack.trackClick;
+		ClickTrack.trackClick = function(e) {
+			/** @type {jQuery} HTMLAnchorElement */
+			const $a = $(e.currentTarget);
+			return $a.hasClass('dfNoClickTrack') ? true : original.call(ClickTrack, e);
+		};
+		/*Discourse.reopen({
+			LOG_TRANSITIONS: true,
+			LOG_TRANSITIONS_INTERNAL: true
+		});*/
+		decorateCooked(c, onDecorateCooked);
+	}
+}};
 /**
  * @link http://stackoverflow.com/a/3820412
  * @param {String} url
  * @returns {String}
  */
-var baseName = function(url) {
+const baseName = function(url) {
 	/** @type {String} */
 	var result = new String(url).substring(url.lastIndexOf('/') + 1);
 	if (result.lastIndexOf('.') != -1) {
@@ -19,11 +35,15 @@ var baseName = function(url) {
  * @param {String} url
  * @returns {String}
  */
-var imageId = function(url) {
+const imageId = function(url) {
 	var hash = baseName(url);
 	return 40 === hash.length ? hash : url;
 };
-var onClick = function(e) {
+/**
+ * @param {Event} e
+ * @returns {Boolean}
+ */
+const onClick = function(e) {
 	/** @type {jQuery} HTMLAnchorElement */
 	var $a = $(e.currentTarget);
 	/** @type {String} */
@@ -44,6 +64,102 @@ var onClick = function(e) {
 		result = true;
 	}
 	return result;
+};
+/**
+ * 2015-08-06
+ * 1) decorateCooked вызывает своих подписчиков для каждого сообщения отдельно.
+ * 2) $post содержит не только сообщение, но и элементы управления.
+ * Чтобы применить свои селекторы только к сообщению,
+ * используйте родительский селектор .cooked, например:
+ * const $tables = $('.cooked > table', $post);
+ * @used-by decorateCooked
+ * @link https://github.com/discourse/discourse/blob/v1.4.0.beta7/app/assets/javascripts/discourse/lib/plugin-api.js.es6#L5
+ * @param {jQuery} HTMLDivElement $post
+ * @returns void
+ */
+const onDecorateCooked = function($post) {
+	const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Size'];
+	const h = w;
+	/** @type {jQuery} HTMLDivElement[] */
+	var $galleries = $('.df-gallery', $post);
+	const matches = location.hash.match(/#image(\d+)/);
+	const imageIdToOpen = matches && (1 < matches.length) ? matches[1] : null;
+	const imageIdSelector =
+		imageIdToOpen ? 'img[data-file-id=' + imageIdToOpen + ']' : null
+	;
+	if ($galleries.length) {
+		// For edit mode: check if already processed.
+		// Important!
+		$('br', $galleries).remove();
+		/** @type {jQuery} HTMLImageElement[] */
+		var $images = $galleries.children('img');
+		$images.each(function() {
+			/** @type {jQuery} HTMLImageElement */
+			var $image = $(this);
+			/** @type {String} */
+			var fullSizeUrl = $image.attr('src');
+			/** @type {String} */
+			var thumbUrl =
+				'/df/core/thumb/' + w + '/' + h
+				+ '?original=' + encodeURIComponent(imageId(fullSizeUrl))
+			;
+			/** @type {String} */
+			var title = $image.attr('alt');
+			$image.attr({src: thumbUrl, width: w, height: h});
+			var $a = $('<a/>');
+			$a.attr({href: fullSizeUrl, title: title, 'class': 'dfNoClickTrack'});
+			//$a.css({width: w, height: h});
+			$a.click(onClick);
+			$image.wrap($a);
+		});
+		// We do not use standard Magnific Popup
+		// loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
+		// because it does not work in gallery mode.
+		$galleries.each(function() {
+			var $gallery = $(this);
+			var options = {
+				delegate: 'a',
+				type: 'image',
+				tLoading: 'Loading image #%curr%...',
+				mainClass: 'mfp-img-mobile',
+				gallery: {
+					enabled: true,
+					navigateByImgClick: true,
+					preload: [0,1] // Will preload 0 - before current, and 1 after the current image
+				},
+				image: {
+					tError: '<a href="%url%">The image #%curr%</a> could not be loaded.',
+					titleSrc: function(item) {
+						return item.el.attr('title');
+					}
+				}
+				,callbacks: {
+					change: function(data) {
+						const imageId = data.el.children('img').attr('data-file-id');
+						if (imageId) {
+							silentlyChangeLocationHash('#image' + imageId);
+						}
+					}
+					,close: function() {removeLocationHash();}
+		  		}
+			};
+			var indexToOpen = null;
+			if (imageIdToOpen) {
+				const $img = $(imageIdSelector, $gallery);
+				if ($img.length) {
+					indexToOpen = $img.parent().index();
+				}
+			}
+			if (!indexToOpen) {
+				$gallery.magnificPopup(options);
+			}
+			else {
+				$gallery.magnificPopup(options);
+				$gallery.magnificPopup('open', indexToOpen);
+			}
+			$gallery.removeClass('df-hidden');
+		});
+	}
 };
 /** @link http://stackoverflow.com/a/5298684 */
 const removeLocationHash = function () {
@@ -66,106 +182,3 @@ const silentlyChangeLocationHash = function(newHash) {
 	location.hash = newHash;
 	DiscourseLocation.disableUpdateUrl = false;
 };
-export default {name: 'df-gallery', after: 'inject-objects', initialize: function(container) {
-	if (Discourse.SiteSettings['«Gallery»_Enabled']) {
-		const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Size'];
-		const h = w;
-		/** @type {Function} */
-		var original = ClickTrack.trackClick;
-		ClickTrack.trackClick = function(e) {
-			/** @type {jQuery} HTMLAnchorElement */
-			var $a = $(e.currentTarget);
-			return $a.hasClass('dfNoClickTrack') ? true : original.call(ClickTrack, e);
-		};
-		/*Discourse.reopen({
-			LOG_TRANSITIONS: true,
-			LOG_TRANSITIONS_INTERNAL: true
-		});*/
-		decorateCooked(container, function($post) {
-			// 2015-07-08
-			// Это обрамление нужно обязательно!
-			$(function() {
-				/** @type {jQuery} HTMLDivElement[] */
-				var $galleries = $('.df-gallery');
-				const matches = location.hash.match(/#image(\d+)/);
-				const imageIdToOpen = matches && (1 < matches.length) ? matches[1] : null;
-				const imageIdSelector =
-					imageIdToOpen ? 'img[data-file-id=' + imageIdToOpen + ']' : null
-				;
-				if ($galleries.length) {
-					// For edit mode: check if already processed.
-					// Important!
-					$('br', $galleries).remove();
-					/** @type {jQuery} HTMLImageElement[] */
-					var $images = $galleries.children('img');
-					$images.each(function() {
-						/** @type {jQuery} HTMLImageElement */
-						var $image = $(this);
-						/** @type {String} */
-						var fullSizeUrl = $image.attr('src');
-						/** @type {String} */
-						var thumbUrl =
-							'/df/core/thumb/' + w + '/' + h
-							+ '?original=' + encodeURIComponent(imageId(fullSizeUrl))
-						;
-						/** @type {String} */
-						var title = $image.attr('alt');
-						$image.attr({src: thumbUrl, width: w, height: h});
-						var $a = $('<a/>');
-						$a.attr({href: fullSizeUrl, title: title, 'class': 'dfNoClickTrack'});
-						//$a.css({width: w, height: h});
-						$a.click(onClick);
-						$image.wrap($a);
-					});
-					// We do not use standard Magnific Popup
-					// loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
-					// because it does not work in gallery mode.
-					$galleries.each(function() {
-						var $gallery = $(this);
-						var options = {
-							delegate: 'a',
-							type: 'image',
-							tLoading: 'Loading image #%curr%...',
-							mainClass: 'mfp-img-mobile',
-							gallery: {
-								enabled: true,
-								navigateByImgClick: true,
-								preload: [0,1] // Will preload 0 - before current, and 1 after the current image
-							},
-							image: {
-								tError: '<a href="%url%">The image #%curr%</a> could not be loaded.',
-								titleSrc: function(item) {
-									return item.el.attr('title');
-								}
-							}
-							,callbacks: {
-								change: function(data) {
-									const imageId = data.el.children('img').attr('data-file-id');
-									if (imageId) {
-										silentlyChangeLocationHash('#image' + imageId);
-									}
-								}
-								,close: function() {removeLocationHash();}
-					  		}
-						};
-						var indexToOpen = null;
-						if (imageIdToOpen) {
-							const $img = $(imageIdSelector, $gallery);
-							if ($img.length) {
-								indexToOpen = $img.parent().index();
-							}
-						}
-						if (!indexToOpen) {
-							$gallery.magnificPopup(options);
-						}
-						else {
-							$gallery.magnificPopup(options);
-							$gallery.magnificPopup('open', indexToOpen);
-						}
-						$gallery.removeClass('df-hidden');
-					});
-				}
-			});
-		});
-	}
-}};
