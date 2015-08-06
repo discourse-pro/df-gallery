@@ -1,4 +1,5 @@
 import DiscourseLocation from 'discourse/plugins/df-gallery/discourse-location';
+import df from 'discourse/plugins/df-core/df';
 import {decorateCooked} from 'discourse/lib/plugin-api';
 import loadScript from 'discourse/lib/load-script';
 import ClickTrack from 'discourse/lib/click-track';
@@ -65,6 +66,87 @@ const onClick = function(e) {
 	}
 	return result;
 };
+const Caption = {
+	/**
+	 * @param @type {jQuery} HTMLImageElement $image
+	 * @returns {String}
+	 */
+	get: function($image) {return $image.attr('alt');}
+	/**
+	 * @param @type {jQuery} HTMLImageElement $image
+	 * @returns void
+	 */
+	,prepare: function($image) {
+		/**
+		 * 2015-08-06
+		 * К сожалению, jQuery не умеет выбирать текстовых братьев.
+		 * В частности, .siblings() и .next() просто игнорируют текстовых братьев,
+		 * не обрамлённых внутрь каких либо тегов.
+		 * Поэтому делаем выборку текстовых братьев вручную посредством DOM.
+		 */
+		/** @type HTMLImageElement */
+		const image = $image.get(0);
+		/** @type HTMLElement */
+		var e = image.nextSibling;
+		/** @type HTMLElement[] */
+		var nextUntilImg = [];
+		/** @type HTMLElement[] */
+		var descriptionA = [];
+		/**
+		 * Cвойство tagName текстовых узлов возвращает undefined.
+		 * @param HTMLElement e
+		 * @param string tag
+		 * @returns {?string}
+		 */
+		const isTag = function(e, tag) {return e.tagName && tag === e.tagName.toLowerCase();};
+		// Пропускаем начальные br.
+		while (e && isTag(e, 'br')) {
+			nextUntilImg.push(e);
+			e = e.nextSibling;
+		}
+		// Теперь разбираем подпись к картинке.
+		while (e && !isTag(e, 'img')) {
+			nextUntilImg.push(e);
+			descriptionA.push(e);
+			e = e.nextSibling;
+		}
+		// Теперь удаляем конечные br.
+		while (descriptionA.length && isTag(descriptionA[descriptionA.length - 1], 'br')) {
+			descriptionA.pop();
+		}
+		/** @type {String} */
+		var description = '';
+		$.each(descriptionA, function() {
+			description += df.dom.outerHtml(this);
+		});
+		$.each(nextUntilImg, function() {
+			/** @link http://stackoverflow.com/a/8830882 */
+			this.parentNode.removeChild(this);
+		});
+		if (description.length) {
+			/** @type {String} */
+			var title = $image.attr('alt');
+			/** @type {String} */
+			var descriptionCooked = Discourse.Markdown.cook(description);
+			var $descriptionCooked = $(descriptionCooked);
+			$descriptionCooked =
+				$('<div>')
+					.addClass('df-description')
+					.html($descriptionCooked.is('p') ? $descriptionCooked.html() : descriptionCooked)
+			;
+			descriptionCooked = df.dom.outerHtml($descriptionCooked);
+			if (title) {
+				title = df.dom.outerHtml($('<div>').addClass('df-title').html(title));
+			}
+			/**
+			 * Discourse.Markdown.cook обрамляет наше описание в тег p.
+			 * В принципе, нам это на руку: таким образом, при наличии alt,
+			 * alt становится заголовком изображения, а description — описанием.
+			 */
+			$image.attr('alt', title ? title + descriptionCooked : descriptionCooked);
+		}
+	}
+};
 /**
  * 2015-08-06
  * 1) decorateCooked вызывает своих подписчиков для каждого сообщения отдельно.
@@ -78,8 +160,6 @@ const onClick = function(e) {
  * @returns void
  */
 const onDecorateCooked = function($post) {
-	const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Size'];
-	const h = w;
 	/** @type {jQuery} HTMLDivElement[] */
 	var $galleries = $('.df-gallery', $post);
 	const matches = location.hash.match(/#image(\d+)/);
@@ -87,27 +167,30 @@ const onDecorateCooked = function($post) {
 	const imageIdSelector =
 		imageIdToOpen ? 'img[data-file-id=' + imageIdToOpen + ']' : null
 	;
+	debugger;
 	if ($galleries.length) {
+		/** @type {String} */
+		const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Size'];
+		/** @type {String} */
+		const h = w;
+		/** @type {String} */
+		const thumbUrlPrefix = '/df/core/thumb/' + w + '/' + h + '?original=';
 		// For edit mode: check if already processed.
 		// Important!
-		$('br', $galleries).remove();
+		//$('br', $galleries).remove();
 		/** @type {jQuery} HTMLImageElement[] */
-		var $images = $galleries.children('img');
+		const $images = $galleries.children('img');
 		$images.each(function() {
 			/** @type {jQuery} HTMLImageElement */
-			var $image = $(this);
+			const $image = $(this);
+			Caption.prepare($image);
 			/** @type {String} */
-			var fullSizeUrl = $image.attr('src');
+			const fullSizeUrl = $image.attr('src');
 			/** @type {String} */
-			var thumbUrl =
-				'/df/core/thumb/' + w + '/' + h
-				+ '?original=' + encodeURIComponent(imageId(fullSizeUrl))
-			;
-			/** @type {String} */
-			var title = $image.attr('alt');
+			const thumbUrl = thumbUrlPrefix + encodeURIComponent(imageId(fullSizeUrl));
 			$image.attr({src: thumbUrl, width: w, height: h});
-			var $a = $('<a/>');
-			$a.attr({href: fullSizeUrl, title: title, 'class': 'dfNoClickTrack'});
+			const $a = $('<a/>');
+			$a.attr({href: fullSizeUrl, title: Caption.get($image), 'class': 'dfNoClickTrack'});
 			//$a.css({width: w, height: h});
 			$a.click(onClick);
 			$image.wrap($a);
@@ -144,18 +227,24 @@ const onDecorateCooked = function($post) {
 		  		}
 			};
 			var indexToOpen = null;
+			debugger;
 			if (imageIdToOpen) {
 				const $img = $(imageIdSelector, $gallery);
 				if ($img.length) {
 					indexToOpen = $img.parent().index();
 				}
 			}
-			if (!indexToOpen) {
-				$gallery.magnificPopup(options);
+			/**
+			 * 2015-08-06
+			 * Ошибочно здесь ставить условие !indexToOpen,
+			 * потому что indexToOpen может быть равен 0.
+			 */
+			if (null === indexToOpen) {
+				$gallery.dfMagnificPopup(options);
 			}
 			else {
-				$gallery.magnificPopup(options);
-				$gallery.magnificPopup('open', indexToOpen);
+				$gallery.dfMagnificPopup(options);
+				$gallery.dfMagnificPopup('open', indexToOpen);
 			}
 			$gallery.removeClass('df-hidden');
 		});
@@ -163,6 +252,7 @@ const onDecorateCooked = function($post) {
 };
 /** @link http://stackoverflow.com/a/5298684 */
 const removeLocationHash = function () {
+	debugger;
     var scrollV, scrollH, loc = window.location;
     if ('pushState' in history) {
 		history.pushState('', document.title, loc.pathname + loc.search);

@@ -93,11 +93,11 @@ var _mfpOn = function(name, f) {
 	},
 	// Initialize Magnific Popup only when called at least once
 	_checkInstance = function() {
-		if(!$.magnificPopup.instance) {
+		if(!$.dfMagnificPopup.instance) {
 			/*jshint -W020 */
 			mfp = new MagnificPopup();
 			mfp.init();
-			$.magnificPopup.instance = mfp;
+			$.dfMagnificPopup.instance = mfp;
 		}
 	},
 	// CSS transition detection, http://stackoverflow.com/questions/7264899/detect-css-transitions-using-javascript-and-without-modernizr
@@ -129,7 +129,7 @@ MagnificPopup.prototype = {
 
 	/**
 	 * Initializes Magnific Popup plugin.
-	 * This function is triggered only once when $.fn.magnificPopup or $.magnificPopup is executed
+	 * This function is triggered only once when $.fn.dfMagnificPopup or $.dfMagnificPopup is executed
 	 */
 	init: function() {
 		var appVersion = navigator.appVersion;
@@ -203,7 +203,7 @@ MagnificPopup.prototype = {
 
 
 
-		mfp.st = $.extend(true, {}, $.magnificPopup.defaults, data );
+		mfp.st = $.extend(true, {}, $.dfMagnificPopup.defaults, data );
 		mfp.fixedContentPos = mfp.st.fixedContentPos === 'auto' ? !mfp.probablyMobile : mfp.st.fixedContentPos;
 
 		if(mfp.st.modal) {
@@ -239,7 +239,7 @@ MagnificPopup.prototype = {
 
 
 		// Initializing modules
-		var modules = $.magnificPopup.modules;
+		var modules = $.dfMagnificPopup.modules;
 		for(i = 0; i < modules.length; i++) {
 			var n = modules[i];
 			n = n.charAt(0).toUpperCase() + n.slice(1);
@@ -619,7 +619,7 @@ MagnificPopup.prototype = {
 			options = {};
 		}
 
-		var eName = 'click.magnificPopup';
+		var eName = 'click.dfMagnificPopup';
 		options.mainEl = el;
 
 		if(options.items) {
@@ -636,14 +636,14 @@ MagnificPopup.prototype = {
 		}
 	},
 	_openClick: function(e, el, options) {
-		var midClick = options.midClick !== undefined ? options.midClick : $.magnificPopup.defaults.midClick;
+		var midClick = options.midClick !== undefined ? options.midClick : $.dfMagnificPopup.defaults.midClick;
 
 
 		if(!midClick && ( e.which === 2 || e.ctrlKey || e.metaKey ) ) {
 			return;
 		}
 
-		var disableOn = options.disableOn !== undefined ? options.disableOn : $.magnificPopup.defaults.disableOn;
+		var disableOn = options.disableOn !== undefined ? options.disableOn : $.dfMagnificPopup.defaults.disableOn;
 
 		if(disableOn) {
 			if($.isFunction(disableOn)) {
@@ -827,7 +827,7 @@ MagnificPopup.prototype = {
 /**
  * Public static functions
  */
-$.magnificPopup = {
+$.dfMagnificPopup = {
 	instance: null,
 	proto: MagnificPopup.prototype,
 	modules: [],
@@ -848,12 +848,12 @@ $.magnificPopup = {
 	},
 
 	close: function() {
-		return $.magnificPopup.instance && $.magnificPopup.instance.close();
+		return $.dfMagnificPopup.instance && $.dfMagnificPopup.instance.close();
 	},
 
 	registerModule: function(name, module) {
 		if(module.options) {
-			$.magnificPopup.defaults[name] = module.options;
+			$.dfMagnificPopup.defaults[name] = module.options;
 		}
 		$.extend(this.proto, module.proto);
 		this.modules.push(name);
@@ -911,7 +911,7 @@ $.magnificPopup = {
 
 
 
-$.fn.magnificPopup = function(options) {
+$.fn.dfMagnificPopup = function(options) {
 	_checkInstance();
 
 	var jqEl = $(this);
@@ -921,7 +921,7 @@ $.fn.magnificPopup = function(options) {
 
 		if(options === 'open') {
 			var items,
-				itemOpts = _isJQ ? jqEl.data('magnificPopup') : jqEl[0].magnificPopup,
+				itemOpts = _isJQ ? jqEl.data('dfMagnificPopup') : jqEl[0].dfMagnificPopup,
 				index = parseInt(arguments[1], 10) || 0;
 
 			if(itemOpts.items) {
@@ -949,9 +949,9 @@ $.fn.magnificPopup = function(options) {
 		 * we assign "options" object directly to the DOM element. FTW!
 		 */
 		if(_isJQ) {
-			jqEl.data('magnificPopup', options);
+			jqEl.data('dfMagnificPopup', options);
 		} else {
-			jqEl[0].magnificPopup = options;
+			jqEl[0].dfMagnificPopup = options;
 		}
 
 		mfp.addGroup(jqEl, options);
@@ -995,7 +995,7 @@ var INLINE_NS = 'inline',
 		}
 	};
 
-$.magnificPopup.registerModule(INLINE_NS, {
+$.dfMagnificPopup.registerModule(INLINE_NS, {
 	options: {
 		hiddenClass: 'hide', // will be appended with `mfp-` prefix
 		markup: '',
@@ -1067,7 +1067,7 @@ var AJAX_NS = 'ajax',
 		}
 	};
 
-$.magnificPopup.registerModule(AJAX_NS, {
+$.dfMagnificPopup.registerModule(AJAX_NS, {
 
 	options: {
 		settings: null,
@@ -1157,7 +1157,7 @@ var _imgInterval,
 		return '';
 	};
 
-$.magnificPopup.registerModule('image', {
+$.dfMagnificPopup.registerModule('image', {
 
 	options: {
 		markup: '<div class="mfp-figure">'+
@@ -1398,7 +1398,7 @@ var hasMozTransform,
 		return hasMozTransform;
 	};
 
-$.magnificPopup.registerModule('zoom', {
+$.dfMagnificPopup.registerModule('zoom', {
 
 	options: {
 		enabled: false,
@@ -1600,7 +1600,7 @@ var IFRAME_NS = 'iframe',
 		}
 	};
 
-$.magnificPopup.registerModule(IFRAME_NS, {
+$.dfMagnificPopup.registerModule(IFRAME_NS, {
 
 	options: {
 		markup: '<div class="mfp-iframe-scaler">'+
@@ -1702,7 +1702,7 @@ var _getLoopedId = function(index) {
 		return text.replace(/%curr%/gi, curr + 1).replace(/%total%/gi, total);
 	};
 
-$.magnificPopup.registerModule('gallery', {
+$.dfMagnificPopup.registerModule('gallery', {
 
 	options: {
 		enabled: false,
@@ -1923,7 +1923,7 @@ addSwipeGesture: function() {
 
 var RETINA_NS = 'retina';
 
-$.magnificPopup.registerModule(RETINA_NS, {
+$.dfMagnificPopup.registerModule(RETINA_NS, {
 	options: {
 		replaceSrc: function(item) {
 			return item.src.replace(/\.\w+$/, function(m) { return '@2x' + m; });

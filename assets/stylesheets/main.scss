@@ -16,3 +16,10 @@
 	}
 }
 .df-hidden {display: none;}
+.mfp-gallery {
+	.mfp-title {
+		/** @link https://developer.mozilla.org/en-US/docs/Web/CSS/Adjacent_sibling_selectors */
+		.df-title + .df-description {margin-top: 0.5em;}
+	}
+}
+
