@@ -1,50 +1,21 @@
-import DiscourseLocation from 'discourse/lib/discourse-location';
+import DiscourseLocation from 'discourse/plugins/df-gallery/discourse-location';
 import {decorateCooked} from 'discourse/lib/plugin-api';
 import loadScript from 'discourse/lib/load-script';
 import ClickTrack from 'discourse/lib/click-track';
-DiscourseLocation.reopen({
-	/**
-	 * 2015-07-09
-	 * Ядро Discourse содержит проблемный код в методе onUpdateURL класса DiscourseLocation:
-	 * app/assets/javascripts/discourse/lib/discourse-location.js.es6:
-		popstateCallbacks.forEach(function(cb) {
-			cb(url);
-		});
-	 * Из-за этого кода при моей двойной ручной смене в адресной строке хэша Discourse зависает.
-	 * Моя заплатка устраняет эту проблему.
-	 */
-	onUpdateURL: function(callback) {
-		this._super(callback);
-		const guid = Ember.guidFor(this);
-		const eventId = 'popstate.ember-location-' + guid;
-		const $window = $(window);
-		const events = $._data($window[0], 'events');
-		if (events && events['popstate'] && events['popstate'][0] && events['popstate'][0].handler) {
-			const coreHandler = events['popstate'][0].handler;
-			$window.off(eventId);
-			if (coreHandler) {
-				$window.on(eventId, function() {
-					if (!DiscourseLocation.disableUpdateUrl) {
-						coreHandler.call(window);
-					}
-				});
-			}
-		}
-	}
-});
-/*
+/**
+ * @link http://stackoverflow.com/a/3820412
  * @param {String} url
  * @returns {String}
  */
 var baseName = function(url) {
 	/** @type {String} */
 	var result = new String(url).substring(url.lastIndexOf('/') + 1);
-	if (result.lastIndexOf(".") != -1) {
-		result = result.substring(0, result.lastIndexOf("."));
+	if (result.lastIndexOf('.') != -1) {
+		result = result.substring(0, result.lastIndexOf('.'));
 	}
 	return result;
 };
-/*
+/**
  * @param {String} url
  * @returns {String}
  */
@@ -74,7 +45,7 @@ var onClick = function(e) {
 	}
 	return result;
 };
-/** @link http://stackoverflow.com/a/5298684/254475 */
+/** @link http://stackoverflow.com/a/5298684 */
 const removeLocationHash = function () {
     var scrollV, scrollH, loc = window.location;
     if ('pushState' in history) {
