@@ -167,7 +167,6 @@ const onDecorateCooked = function($post) {
 	const imageIdSelector =
 		imageIdToOpen ? 'img[data-file-id=' + imageIdToOpen + ']' : null
 	;
-	debugger;
 	if ($galleries.length) {
 		/** @type {String} */
 		const w = Discourse.SiteSettings['«Gallery»_Thumbnail_Size'];
@@ -227,7 +226,6 @@ const onDecorateCooked = function($post) {
 		  		}
 			};
 			var indexToOpen = null;
-			debugger;
 			if (imageIdToOpen) {
 				const $img = $(imageIdSelector, $gallery);
 				if ($img.length) {
@@ -252,7 +250,6 @@ const onDecorateCooked = function($post) {
 };
 /** @link http://stackoverflow.com/a/5298684 */
 const removeLocationHash = function () {
-	debugger;
     var scrollV, scrollH, loc = window.location;
     if ('pushState' in history) {
 		history.pushState('', document.title, loc.pathname + loc.search);
