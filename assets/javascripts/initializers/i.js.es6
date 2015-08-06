@@ -1,4 +1,3 @@
-import DiscourseLocation from 'discourse/plugins/df-gallery/discourse-location';
 import df from 'discourse/plugins/df-core/df';
 import {decorateCooked} from 'discourse/lib/plugin-api';
 import loadScript from 'discourse/lib/load-script';
@@ -93,14 +92,30 @@ const Caption = {
 		/** @type HTMLElement[] */
 		var descriptionA = [];
 		/**
+		 * @param HTMLElement e
+		 * @returns {Boolean}
+		 */
+		const isGarbage = function(e) {
+			return (
+				isTag(e, 'br')
+				// комментарий: http://www.w3schools.com/jsref/prop_node_nodetype.asp
+				|| (8 === e.nodeType)
+				// текст
+				|| (3 === e.nodeType && '' === e.nodeValue.trim())
+			);
+		};
+		/**
 		 * Cвойство tagName текстовых узлов возвращает undefined.
 		 * @param HTMLElement e
 		 * @param string tag
-		 * @returns {?string}
+		 * @returns {Boolean}
 		 */
-		const isTag = function(e, tag) {return e.tagName && tag === e.tagName.toLowerCase();};
+		const isTag = function(e, tag) {return !!(e.tagName && tag === e.tagName.toLowerCase());};
 		// Пропускаем начальные br.
-		while (e && isTag(e, 'br')) {
+		// 2015-08-07
+		// Оказывается, нам надо пропускать не только начальные br,
+		// но и мусор перед br: пробелы, переносы строк, табуляции и т.п.
+		while (e && isGarbage(e)) {
 			nextUntilImg.push(e);
 			e = e.nextSibling;
 		}
@@ -110,15 +125,12 @@ const Caption = {
 			descriptionA.push(e);
 			e = e.nextSibling;
 		}
-		// Теперь удаляем конечные br.
-		while (descriptionA.length && isTag(descriptionA[descriptionA.length - 1], 'br')) {
+		// Теперь удаляем конечные br и мусор.
+		while (descriptionA.length && isGarbage(descriptionA[descriptionA.length - 1])) {
 			descriptionA.pop();
 		}
 		/** @type {String} */
-		var description = '';
-		$.each(descriptionA, function() {
-			description += df.dom.outerHtml(this);
-		});
+		var description = df.dom.outerHtml(descriptionA);
 		$.each(nextUntilImg, function() {
 			/** @link http://stackoverflow.com/a/8830882 */
 			this.parentNode.removeChild(this);
@@ -220,14 +232,14 @@ const onDecorateCooked = function($post) {
 							silentlyChangeLocationHash('#image' + imageId);
 						}
 					}
-					,close: function() {removeLocationHash();}
+					,close: function() {silentlyChangeLocationHash('');}
 		  		}
 			};
 			var indexToOpen = null;
 			if (imageIdToOpen) {
 				const $img = $(imageIdSelector, $gallery);
 				if ($img.length) {
-					indexToOpen = $img.parent().index('img');
+					indexToOpen = $img.parent().index();
 				}
 			}
 			/**
@@ -246,24 +258,7 @@ const onDecorateCooked = function($post) {
 		});
 	}
 };
-/** @link http://stackoverflow.com/a/5298684 */
-const removeLocationHash = function () {
-    var scrollV, scrollH, loc = window.location;
-    if ('pushState' in history) {
-		history.pushState('', document.title, loc.pathname + loc.search);
-	}
-    else {
-        // Prevent scrolling by storing the page's current scroll offset
-        scrollV = document.body.scrollTop;
-        scrollH = document.body.scrollLeft;
-		silentlyChangeLocationHash('');
-        // Restore the scroll offset, should be flicker free
-        document.body.scrollTop = scrollV;
-        document.body.scrollLeft = scrollH;
-    }
-};
 const silentlyChangeLocationHash = function(newHash) {
-	DiscourseLocation.disableUpdateUrl = true;
-	location.hash = newHash;
-	DiscourseLocation.disableUpdateUrl = false;
+	const discourseLocation = Discourse.URL.get('router.location');
+	discourseLocation.pushState(discourseLocation.getURL() + newHash);
 };
