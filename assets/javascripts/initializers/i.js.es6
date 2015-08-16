@@ -2,7 +2,7 @@ import df from 'discourse/plugins/df-core/df';
 import {decorateCooked} from 'discourse/lib/plugin-api';
 import loadScript from 'discourse/lib/load-script';
 import ClickTrack from 'discourse/lib/click-track';
-export default {name: 'df-gallery', initialize: function(c) {
+export default {name: 'df-gallery', initialize(c) {
 	if (Discourse.SiteSettings['«Gallery»_Enabled']) {
 		/** @type {Function} */
 		const original = ClickTrack.trackClick;
