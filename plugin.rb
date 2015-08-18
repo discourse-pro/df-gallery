@@ -4,9 +4,7 @@
 # authors: Dmitry Fedyuk
 # url: https://discourse.pro/t/34
 register_asset 'javascripts/markdown.js', :server_side
-register_asset 'javascripts/magnific-popup.js'
 register_asset 'stylesheets/main.scss'
-register_asset 'stylesheets/magnific-popup/main.scss'
 after_initialize do
 	# 2015-07-08
 	# Добавляем к картинкам идентификаторы соответствующих им в таблице uploads строк
