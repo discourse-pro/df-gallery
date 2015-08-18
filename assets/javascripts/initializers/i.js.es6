@@ -2,22 +2,20 @@ import df from 'discourse/plugins/df-core/df';
 import {decorateCooked} from 'discourse/lib/plugin-api';
 import loadScript from 'discourse/lib/load-script';
 import ClickTrack from 'discourse/lib/click-track';
-export default {name: 'df-gallery', initialize(c) {
-	if (Discourse.SiteSettings['«Gallery»_Enabled']) {
-		/** @type {Function} */
-		const original = ClickTrack.trackClick;
-		ClickTrack.trackClick = function(e) {
-			/** @type {jQuery} HTMLAnchorElement */
-			const $a = $(e.currentTarget);
-			return $a.hasClass('dfNoClickTrack') ? true : original.call(ClickTrack, e);
-		};
-		/*Discourse.reopen({
-			LOG_TRANSITIONS: true,
-			LOG_TRANSITIONS_INTERNAL: true
-		});*/
-		decorateCooked(c, onDecorateCooked);
-	}
-}};
+export default {name: 'df-gallery', initialize(c) {if (Discourse.SiteSettings['«Gallery»_Enabled']) {
+	/** @type {Function} */
+	const original = ClickTrack.trackClick;
+	ClickTrack.trackClick = function(e) {
+		/** @type {jQuery} HTMLAnchorElement */
+		const $a = $(e.currentTarget);
+		return $a.hasClass('dfNoClickTrack') ? true : original.call(ClickTrack, e);
+	};
+	/*Discourse.reopen({
+		LOG_TRANSITIONS: true,
+		LOG_TRANSITIONS_INTERNAL: true
+	});*/
+	decorateCooked(c, onDecorateCooked);
+}}};
 /**
  * @link http://stackoverflow.com/a/3820412
  * @param {String} url
@@ -67,12 +65,12 @@ const onClick = function(e) {
 };
 const Caption = {
 	/**
-	 * @param @type {jQuery} HTMLImageElement $image
+	 * @param {jQuery} $image HTMLImageElement
 	 * @returns {String}
 	 */
 	get: function($image) {return $image.attr('alt');}
 	/**
-	 * @param @type {jQuery} HTMLImageElement $image
+	 * @param {jQuery} $image HTMLImageElement
 	 * @returns void
 	 */
 	,prepare: function($image) {
@@ -85,14 +83,14 @@ const Caption = {
 		 */
 		/** @type HTMLImageElement */
 		const image = $image.get(0);
-		/** @type HTMLElement */
+		/** @type {HTMLElement} */
 		var e = image.nextSibling;
-		/** @type HTMLElement[] */
+		/** @type {HTMLElement[]} */
 		var nextUntilImg = [];
-		/** @type HTMLElement[] */
+		/** @type {HTMLElement[]} */
 		var descriptionA = [];
 		/**
-		 * @param HTMLElement e
+		 * @param {HTMLElement} e
 		 * @returns {Boolean}
 		 */
 		const isGarbage = function(e) {
@@ -106,8 +104,8 @@ const Caption = {
 		};
 		/**
 		 * Cвойство tagName текстовых узлов возвращает undefined.
-		 * @param HTMLElement e
-		 * @param string tag
+		 * @param {HTMLElement} e
+		 * @param {String} tag
 		 * @returns {Boolean}
 		 */
 		const isTag = function(e, tag) {return !!(e.tagName && tag === e.tagName.toLowerCase());};
