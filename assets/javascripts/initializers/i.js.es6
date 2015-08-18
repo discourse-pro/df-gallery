@@ -68,12 +68,12 @@ const Caption = {
 	 * @param {jQuery} $image HTMLImageElement
 	 * @returns {String}
 	 */
-	get: function($image) {return $image.attr('alt');}
+	get($image) {return $image.attr('alt');}
 	/**
 	 * @param {jQuery} $image HTMLImageElement
 	 * @returns void
 	 */
-	,prepare: function($image) {
+	,prepare($image) {
 		/**
 		 * 2015-08-06
 		 * К сожалению, jQuery не умеет выбирать текстовых братьев.
@@ -219,18 +219,16 @@ const onDecorateCooked = function($post) {
 				},
 				image: {
 					tError: '<a href="%url%">The image #%curr%</a> could not be loaded.',
-					titleSrc: function(item) {
-						return item.el.attr('title');
-					}
+					titleSrc(item) {return item.el.attr('title');}
 				}
 				,callbacks: {
-					change: function(data) {
+					change(data) {
 						const imageId = data.el.children('img').attr('data-file-id');
 						if (imageId) {
 							silentlyChangeLocationHash('#image' + imageId);
 						}
 					}
-					,close: function() {silentlyChangeLocationHash('');}
+					,close() {silentlyChangeLocationHash('');}
 		  		}
 			};
 			var indexToOpen = null;
