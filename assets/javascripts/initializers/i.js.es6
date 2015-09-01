@@ -14,6 +14,7 @@ export default {name: 'df-gallery', initialize(c) {if (Discourse.SiteSettings['Â
 		LOG_TRANSITIONS: true,
 		LOG_TRANSITIONS_INTERNAL: true
 	});*/
+	//noinspection JSUnusedAssignment
 	decorateCooked(c, onDecorateCooked);
 }}};
 /**
@@ -23,7 +24,7 @@ export default {name: 'df-gallery', initialize(c) {if (Discourse.SiteSettings['Â
  */
 const baseName = function(url) {
 	/** @type {String} */
-	var result = new String(url).substring(url.lastIndexOf('/') + 1);
+	var result = url.substring(url.lastIndexOf('/') + 1);
 	if (result.lastIndexOf('.') != -1) {
 		result = result.substring(0, result.lastIndexOf('.'));
 	}
@@ -83,7 +84,7 @@ const Caption = {
 		 */
 		/** @type HTMLImageElement */
 		const image = $image.get(0);
-		/** @type {HTMLElement} */
+		/** @type {HTMLElement|Node} */
 		var e = image.nextSibling;
 		/** @type {HTMLElement[]} */
 		var nextUntilImg = [];
@@ -144,6 +145,7 @@ const Caption = {
 					.addClass('df-description')
 					.html($descriptionCooked.is('p') ? $descriptionCooked.html() : descriptionCooked)
 			;
+			//noinspection ReuseOfLocalVariableJS
 			descriptionCooked = df.dom.outerHtml($descriptionCooked);
 			if (title) {
 				title = df.dom.outerHtml($('<div>').addClass('df-title').html(title));
@@ -205,6 +207,7 @@ const onDecorateCooked = function($post) {
 		// We do not use standard Magnific Popup
 		// loadScript('/javascripts/jquery.magnific-popup-min.js').then(function() {
 		// because it does not work in gallery mode.
+		//noinspection FunctionWithInconsistentReturnsJS
 		$galleries.each(function() {
 			var $gallery = $(this);
 			var options = {
