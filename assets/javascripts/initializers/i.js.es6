@@ -214,7 +214,7 @@ const onDecorateCooked = function($post) {
 				delegate: 'a',
 				type: 'image',
 				tLoading: 'Loading image #%curr%...',
-				mainClass: 'mfp-img-mobile',
+				mainClass: 'df-mfp-img-mobile',
 				gallery: {
 					enabled: true,
 					navigateByImgClick: true,
