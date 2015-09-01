@@ -67,14 +67,9 @@ const onClick = function(e) {
 const Caption = {
 	/**
 	 * @param {jQuery} $image HTMLImageElement
-	 * @returns {String}
-	 */
-	get($image) {return $image.attr('alt');}
-	/**
-	 * @param {jQuery} $image HTMLImageElement
 	 * @returns void
 	 */
-	,prepare($image) {
+	prepare($image) {
 		/**
 		 * 2015-08-06
 		 * К сожалению, jQuery не умеет выбирать текстовых братьев.
@@ -155,7 +150,7 @@ const Caption = {
 			 * В принципе, нам это на руку: таким образом, при наличии alt,
 			 * alt становится заголовком изображения, а description — описанием.
 			 */
-			$image.attr('alt', title ? title + descriptionCooked : descriptionCooked);
+			$image.attr('data-description', title ? title + descriptionCooked : descriptionCooked);
 		}
 	}
 };
@@ -199,7 +194,12 @@ const onDecorateCooked = function($post) {
 			const thumbUrl = thumbUrlPrefix + encodeURIComponent(imageId(fullSizeUrl));
 			$image.attr({src: thumbUrl, width: w, height: h});
 			const $a = $('<a/>');
-			$a.attr({href: fullSizeUrl, title: Caption.get($image), 'class': 'dfNoClickTrack'});
+			$a.attr({
+				href: fullSizeUrl
+				, 'data-description': $image.attr('data-description')
+				, title: $image.attr('alt')
+				, 'class': 'dfNoClickTrack'
+			});
 			//$a.css({width: w, height: h});
 			$a.click(onClick);
 			$image.wrap($a);
@@ -222,7 +222,7 @@ const onDecorateCooked = function($post) {
 				},
 				image: {
 					tError: '<a href="%url%">The image #%curr%</a> could not be loaded.',
-					titleSrc(item) {return item.el.attr('title');}
+					titleSrc(item) {return item.el.attr('data-description');}
 				}
 				,callbacks: {
 					change(data) {
