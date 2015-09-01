@@ -198,7 +198,7 @@ const onDecorateCooked = function($post) {
 				href: fullSizeUrl
 				, 'data-description': $image.attr('data-description')
 				, title: $image.attr('alt')
-				, 'class': 'dfNoClickTrack'
+				, 'class': 'dfNoClickTrack dfGalleryItem'
 			});
 			//$a.css({width: w, height: h});
 			$a.click(onClick);

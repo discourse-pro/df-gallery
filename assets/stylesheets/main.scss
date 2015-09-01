@@ -2,16 +2,24 @@
 	display: block;
 	//width: 100%;
 	overflow: hidden;
-	a {
+	a.dfGalleryItem {
 		display: block;
 		float: left;
 		margin: 4px;
 		cursor: zoom-in;
-		color: transparent;
+	}
+	// 2015-09-01
+	// Всё равно почему-то не получается синюю рамку убрать :-(
+	a.dfGalleryItem
+	, a.dfGalleryItem:active
+	, a.dfGalleryItem:visited
+	, a.dfGalleryItem:hover
+	, a.dfGalleryItem:focus {
+		color: transparent !important;
+		border: 0 !important;
 		// http://stackoverflow.com/a/3013068
-		img {
-			border: 0;
-			border-image: 0;
+		img, img:active, img:visited, img:hover, img:focus {
+			border: 0 !important;
 		}
 	}
 }
