@@ -3,7 +3,6 @@
 # version: 3.0.0
 # authors: Dmitry Fedyuk
 # url: https://discourse.pro/t/34
-register_asset 'javascripts/markdown.js', :server_side
 register_asset 'stylesheets/main.scss'
 after_initialize do
 	# 2015-07-08

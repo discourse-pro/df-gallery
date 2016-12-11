@@ -1,22 +1,25 @@
-import df from 'discourse/plugins/df-core/df';
-import {decorateCooked} from 'discourse/lib/plugin-api';
-import loadScript from 'discourse/lib/load-script';
 import ClickTrack from 'discourse/lib/click-track';
-export default {name: 'df-gallery', initialize(c) {if (Discourse.SiteSettings['«Gallery»_Enabled']) {
-	/** @type {Function} */
-	const original = ClickTrack.trackClick;
-	ClickTrack.trackClick = function(e) {
-		/** @type {jQuery} HTMLAnchorElement */
-		const $a = $(e.currentTarget);
-		return $a.hasClass('dfNoClickTrack') ? true : original.call(ClickTrack, e);
-	};
-	/*Discourse.reopen({
-		LOG_TRANSITIONS: true,
-		LOG_TRANSITIONS_INTERNAL: true
-	});*/
-	//noinspection JSUnusedAssignment
-	decorateCooked(c, onDecorateCooked);
-}}};
+import loadScript from 'discourse/lib/load-script';
+import {withPluginApi} from 'discourse/lib/plugin-api';
+import df from 'discourse/plugins/df-core/df';
+export default {name: 'df-gallery', initialize() {
+	if (Discourse.SiteSettings['«Gallery»_Enabled']) {
+		withPluginApi('0.1', api => {
+			/** @type {Function} */
+			const original = ClickTrack.trackClick;
+			ClickTrack.trackClick = function(e) {
+				/** @type {jQuery} HTMLAnchorElement */
+				const $a = $(e.currentTarget);
+				return $a.hasClass('dfNoClickTrack') ? true : original.call(ClickTrack, e);
+			};
+			/*Discourse.reopen({
+				LOG_TRANSITIONS: true,
+				LOG_TRANSITIONS_INTERNAL: true
+			});*/
+			api.decorateCooked(onDecorateCooked);
+		});
+	}
+}};
 /**
  * @link http://stackoverflow.com/a/3820412
  * @param {String} url
