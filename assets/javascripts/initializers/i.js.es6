@@ -1,6 +1,7 @@
 import ClickTrack from 'discourse/lib/click-track';
 import loadScript from 'discourse/lib/load-script';
 import {withPluginApi} from 'discourse/lib/plugin-api';
+import {cook} from 'discourse/lib/text';
 import df from 'discourse/plugins/df-core/df';
 export default {name: 'df-gallery', initialize() {
 	if (Discourse.SiteSettings['«Gallery»_Enabled']) {
@@ -136,7 +137,7 @@ const Caption = {
 			/** @type {String} */
 			var title = $image.attr('alt');
 			/** @type {String} */
-			var descriptionCooked = Discourse.Markdown.cook(description);
+			var descriptionCooked = cook(description);
 			var $descriptionCooked = $(descriptionCooked);
 			$descriptionCooked =
 				$('<div>')
