@@ -15,8 +15,6 @@ export function setup(helper) {
 	helper.replaceBlock({
 		start: /(\[gallery])([\s\S]*)/gmi,
 		stop: /\[\/gallery]/gmi,
-		emitter: contentA => {return [
-			'div', {'class': 'df-gallery df-hidden'/*, 'df-photo-id': '123'*/}, contentA.join()
-		];}
+		emitter: contentA => {return ['div', {'class': 'df-gallery df-hidden'}, contentA.join()];}
 	});
 }
